@@ -1,0 +1,127 @@
+/*
+ * Copyright (C) 2012 Texas Instruments Incorporated - http://www.ti.com/
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/am33xx.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+
+/ {
+	/*
+	 * Free up the pins used by the cape from the pinmux helpers.
+	 */
+	fragment@0 {
+		target = <&ocp>;
+		__overlay__ {
+			P2_02_pinmux { status = "disabled"; };	/* keys - left-pad down (down) */
+			P2_04_pinmux { status = "disabled"; };	/* keys - left-pad right (right) */
+			P2_06_pinmux { status = "disabled"; };	/* keys - left-pad up (up) */
+			P2_08_pinmux { status = "disabled"; };	/* keys - left-pad left (left) */
+			P2_18_pinmux { status = "disabled"; };	/* keys - right pad down (enter) */
+			P2_20_pinmux { status = "disabled"; };	/* keys - right-pad right (tab) */
+			P2_22_pinmux { status = "disabled"; };	/* keys - right-pad up (esc)*/
+			P2_24_pinmux { status = "disabled"; };	/* keys - right-pad left (p) */
+			P1_31_pinmux { status = "disabled"; };	/* keys - select (five) */
+			P1_35_pinmux { status = "disabled"; };	/* keys - start (one) */
+		};
+	};
+
+	/*
+	 * Note: PB-LEDS-GAMEPUP-CAPE.dtbo is needed to Make a new set of gpio helpers
+	 * as the default helpers will conflict with the gpio-keys.
+	 */
+
+	/*
+	 * Load the drivers for the buttons.
+	 */
+	fragment@1 {
+		target-path="/";
+		__overlay__ {
+			gpio-keys {
+				compatible = "gpio-keys";
+				autorepeat;
+
+				pinctrl-names = "default";
+				pinctrl-0 = <
+					&P2_02_gpio_pu_pin	/* left-pad down */
+					&P2_04_gpio_pu_pin	/* left-pad right */
+					&P2_06_gpio_pu_pin	/* left-pad up */
+					&P2_08_gpio_pu_pin	/* left-pad left */
+					&P2_18_gpio_pu_pin	/* right-pad down */
+					&P2_20_gpio_pu_pin	/* right-pad right */
+					&P2_22_gpio_pu_pin	/* right-pad up */
+					&P2_24_gpio_pu_pin	/* right-pad left */
+					&P1_31_gpio_pu_pin	/* select */
+					&P1_35_gpio_pu_pin	/* start */
+				>;
+		
+				lp-left {
+					label = "left";
+					linux,code = <105>;
+					gpios = <&gpio1 28 GPIO_ACTIVE_LOW>;
+				};
+		
+				lp-right {
+					label = "right";
+					linux,code = <106>;
+					gpios = <&gpio1 26 GPIO_ACTIVE_LOW>;
+				};
+		
+				lp-up {
+					label = "up";
+					linux,code = <103>;
+					gpios = <&gpio1 25 GPIO_ACTIVE_LOW>;
+				};
+		
+				lp-down {
+					label = "down";
+					linux,code = <108>;
+					gpios = <&gpio1 27 GPIO_ACTIVE_LOW>;
+				};
+		
+				rp-left {
+					label = "p";
+					linux,code = <25>;
+					gpios = <&gpio1 12 GPIO_ACTIVE_LOW>;
+				};
+		
+				rp-right {
+					label = "tab";
+					linux,code = <15>;
+					gpios = <&gpio2 0 GPIO_ACTIVE_LOW>;
+				};
+		
+				rp-up {
+					label = "esc";
+					linux,code = <1>;
+					gpios = <&gpio1 14 GPIO_ACTIVE_LOW>;
+				};
+		
+				rp-down {
+					label = "enter";
+					linux,code = <28>;
+					gpios = <&gpio1 15 GPIO_ACTIVE_LOW>;
+				};
+
+				select {
+					label = "five";
+					linux,code = <6>;
+					gpios = <&gpio3 18 GPIO_ACTIVE_LOW>;
+				};
+
+				start {
+					label = "one";
+					linux,code = <2>;
+					gpios = <&gpio2 24 GPIO_ACTIVE_LOW>;
+				};
+			};
+		};
+	};
+};
+						
