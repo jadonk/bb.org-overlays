@@ -58,7 +58,7 @@
 		__overlay__ {
 			gamepup_display_backlight {
 				compatible = "pwm-leds";
-{
+
 				gamepup_display_backlight_led {
 					// P2_1	- default PWM
 					// ehrpwm1A
