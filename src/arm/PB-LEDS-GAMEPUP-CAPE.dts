@@ -234,15 +234,17 @@
 	fragment@3 {
 		target-path="/";
 		__overlay__ {
-			capeleds {
+			gamepup_leds {
 				compatible = "gpio-leds";
-		
+
+#if 0
 				pinctrl-names = "default";
 				pinctrl-0 = <
 					&P1_04_gpio_pin	/* left */
 					&P2_03_gpio_pin	/* right */
 				>;
-		
+#endif
+
 				led@1 {
 					label = "gamepup::left";
 					gpios = <&gpio2 25 GPIO_ACTIVE_HIGH>;
@@ -258,4 +260,3 @@
 		};
 	};
 };
-						

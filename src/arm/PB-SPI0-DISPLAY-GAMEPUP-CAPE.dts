@@ -63,7 +63,7 @@
 					// P2_1	- default PWM
 					// ehrpwm1A
 					label = "gamepup::display";
-					pwms = <&ehrpwm0 1 500000 0>;
+					pwms = <&ehrpwm1 0 500000 0>;
 					max-brightness = <255>;
 					linux,default-trigger = "backlight";
 				};
