@@ -41,10 +41,10 @@
 				buswidth = <8>;
 				reset-gpios = <&gpio0 27 0>;	/* P2_19 - defaults GPIO */
 				dc-gpios = <&gpio2 1 0>;	/* P2_17 - defaults GPIO */
-				debug = <1>;
+				debug = <0>;
 				spi-max-frequency = <32000000>;
 				rotate = <0>;
-				bgr;
+				rgb;
 				fps = <30>;
 			};
 		};
@@ -65,7 +65,7 @@
 					label = "gamepup::display";
 					pwms = <&ehrpwm1 0 500000 0>;
 					max-brightness = <255>;
-					linux,default-trigger = "backlight";
+					linux,default-trigger = "default-on";
 					brightness-levels = <0 10 20 40 80 120 160 200 255>;
 					default-brightness-level = <4>;
 				};
