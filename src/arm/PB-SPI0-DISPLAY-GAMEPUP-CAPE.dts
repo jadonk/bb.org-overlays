@@ -65,7 +65,9 @@
 					label = "gamepup::display";
 					pwms = <&ehrpwm1 0 500000 0>;
 					max-brightness = <255>;
-					linux,default-trigger = "default-on";
+					linux,default-trigger = "backlight";
+					brightness-levels = <0 10 20 40 80 120 160 200 255>;
+					default-brightness-level = <4>;
 				};
 			};
 		};
