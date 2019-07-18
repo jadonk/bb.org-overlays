@@ -1,0 +1,43 @@
+/*
+ * Copyright (C) 2012,2019 Texas Instruments Incorporated - http://www.ti.com/
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/am33xx.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+
+/ {
+	/*
+	 * Free up the pins used by the cape from the pinmux helpers.
+	 */
+	fragment@0 {
+		target = <&ocp>;
+		__overlay__ {
+			P1_33_pinmux { status = "disabled"; };	/* PWM - buzzer */
+		};
+	};
+
+	/*
+	 * Load ALSA driver for piezo
+	 */
+	fragment@1 {
+		target-path="/";
+		__overlay__ {
+			sndpwm {
+				compatible = "snd-pwmsp";
+				pwms = <&ehrpwm0 1 0 0>;
+				status = "okay";
+				pinctrl-names = "default";
+				pinctrl-0 = <
+					&P1_33_pwm_pin	/* buzzer/speaker */
+				>;
+			};
+		};
+	};
+};

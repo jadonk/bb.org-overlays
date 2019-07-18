@@ -1,0 +1,75 @@
+/*
+ * Copyright (C) 2012,2019 Texas Instruments Incorporated - http://www.ti.com/
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/am33xx.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+
+/ {
+	/*
+	 * Free up the SPI port used by the cape and reallocate it for the LCD.
+	 */
+	fragment@0 {
+		target = <&spi0>;
+		__overlay__ {
+			status = "okay";
+
+			channel@0 { status = "disabled"; };
+			channel@1 { status = "disabled"; };
+		};
+	};
+
+	/*
+	 * Load LCD driver.
+	 */
+	fragment@1 {
+		target = <&spi0>;
+		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			adafruit18: adafruit18@0{
+				compatible = "sitronix,st7735r";
+				reg = <0>;
+				buswidth = <8>;
+				reset-gpios = <&gpio0 27 0>;	/* P2_19 - defaults GPIO */
+				dc-gpios = <&gpio2 1 0>;	/* P2_17 - defaults GPIO */
+				debug = <0>;
+				spi-max-frequency = <32000000>;
+				rotate = <0>;
+				rgb;
+				fps = <30>;
+			};
+		};
+	};
+
+	/*
+	 * Load the PWM LED driver for display backlight.
+	 */
+	fragment@2 {
+		target-path="/";
+		__overlay__ {
+			gamepup_display_backlight {
+				compatible = "pwm-leds";
+
+				gamepup_display_backlight_led {
+					// P2_1	- default PWM
+					// ehrpwm1A
+					label = "gamepup::display";
+					pwms = <&ehrpwm1 0 500000 0>;
+					max-brightness = <255>;
+					linux,default-trigger = "default-on";
+					brightness-levels = <0 10 20 40 80 120 160 200 255>;
+					default-brightness-level = <4>;
+				};
+			};
+		};
+	};
+};
