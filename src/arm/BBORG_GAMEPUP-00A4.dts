@@ -22,7 +22,7 @@
 
 			chosen {
 				overlays {
-					BBORG_GAMEPUP-00A2 = __TIMESTAMP__;
+					BBORG_GAMEPUP-00A4 = __TIMESTAMP__;
 				};
 			};
 		};
@@ -67,11 +67,27 @@
 	};
 
 	/*
-	 * Make a new set of gpio helpers.
+	 * Make a new set of pinmux and gpio helpers.
 	 */
 	fragment@3 {
 		target = <&ocp>;
 		__overlay__ {
+			/* P1_33 (ZCZ ball B13) ehrpwm0B */
+			P1_33_pinmux {
+				compatible = "bone-pinmux-helper";
+				status = "okay";
+				pinctrl-names = "default", "gpio", "gpio_pu", "gpio_pd", "gpio_input", "spi", "pwm", "pruout", "pruin";
+				pinctrl-0 = <&P1_33_pwm_pin>;
+				pinctrl-1 = <&P1_33_gpio_pin>;
+				pinctrl-2 = <&P1_33_gpio_pu_pin>;
+				pinctrl-3 = <&P1_33_gpio_pd_pin>;
+				pinctrl-4 = <&P1_33_gpio_input_pin>;
+				pinctrl-5 = <&P1_33_spi_pin>;
+				pinctrl-6 = <&P1_33_pwm_pin>;
+				pinctrl-7 = <&P1_33_pruout_pin>;
+				pinctrl-8 = <&P1_33_pruin_pin>;
+			};
+
 			cape-universal@1 {
 				compatible = "gpio-of-helper";
 				status = "okay";
@@ -402,13 +418,13 @@
 				led@1 {
 					label = "gamepup::left";
 					gpios = <&gpio2 25 GPIO_ACTIVE_HIGH>;
-					default-state = "off";
+					default-state = "usb-gadget";
 				};
 		
 				led@2 {
 					label = "gamepup::right";
 					gpios = <&gpio0 23 GPIO_ACTIVE_HIGH>;
-					default-state = "off";
+					default-state = "usb-host";
 				};
 			};
 		};
@@ -422,7 +438,7 @@
 		__overlay__ {
 			sndpwm {
 				compatible = "snd-pwmsp";
-				pwms = <&ehrpwm0 1 0 0>;
+				pwms = <&ehrpwm0 1 1000 0>;	/* P1.33 ehrpwm0B, perioud = 1000ns */
 				status = "okay";
 			};
 		};
