@@ -1,0 +1,128 @@
+/*
+ * Copyright (C) 2019 Tomas Arturo Herrera Castro <taherrera@uc.cl>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ * 
+ * Written as part of my master's thesis at PUC Chile,
+ * to run the BeagleBone as an OpenThread Border Router w/o an NCP.
+ *
+ * http://www.sltech.cl
+ *
+ * Compiled using: make ./src/arm/BB-SPI0-AT86RF233-00A0.dtbo
+ *
+ * Tested on BeagleBone Black Rev. C + REB233-XPRO. Linux beaglebone 4.14.71-ti-r80.
+ *
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/board/am335x-bbw-bbb-base.h>
+#include <dt-bindings/pinctrl/am33xx.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+
+/ {
+	compatible = "ti,beaglebone", "ti,beaglebone-black", "ti,beaglebone-green";
+
+	/* identification */
+	part-number = "BB-AT86RF233";
+	version = "00A0";
+
+	/* state the resources this cape uses */
+	exclusive-use =
+		/* the pin header uses */
+		"P9.15",	/* irq P9_15 (R13) gpmc_a0.gpio1[16] */
+		"P9.23",	/* rst P9_23 (V14) gpmc_a1.gpio1[17] */
+		"P9.12",	/* slp P9_12 (U18) gpmc_be1n.gpio1[28] */
+		"P9.17",	/* P9_17 (A16) spi0_cs0.spi0_cs0 */
+		"P9.18",	/* P9_18 (B16) spi0_d1.spi0_d1 */
+		"P9.21",	/* P9_21 (B17) spi0_d0.spi0_d0 */
+		"P9.22",	/* P9_22 (A17) spi0_sclk.spi0_sclk */
+		/* the hardware ip uses */
+		"spi0";
+
+	/*
+	 * Helper to show loaded overlays under: /proc/device-tree/chosen/overlays/
+	 */
+	fragment@0 {
+		target-path="/";
+		__overlay__ {
+
+			chosen {
+				overlays {
+					BB-SPI0-AT86RF233-00A0 = __TIMESTAMP__;
+				};
+			};
+		};
+	};
+
+	/*
+	 * Free up the pins used by the cape from the pinmux helpers.
+	 */
+	fragment@1 {
+		target = <&ocp>;
+		__overlay__ {
+			P9_17_pinmux { status = "disabled"; };	/* P9_17 (A16) spi0_cs0.spi0_cs0 */
+			P9_18_pinmux { status = "disabled"; };	/* P9_18 (B16) spi0_d1.spi0_d1 */
+			P9_21_pinmux { status = "disabled"; };	/* P9_21 (B17) spi0_d0.spi0_d0 */
+			P9_22_pinmux { status = "disabled"; };	/* P9_22 (A17) spi0_sclk.spi0_sclk */
+
+			P9_15_pinmux { status = "disabled"; };	/* irq P9_15 (R13) gpmc_a0.gpio1[16] */
+			P9_23_pinmux { status = "disabled"; };	/* rst P9_23 (V14) gpmc_a1.gpio1[17] */
+			P9_12_pinmux { status = "disabled"; };	/* slp P9_12 (U18) gpmc_be1n.gpio1[28] */
+		};
+	};
+
+	fragment@2 {
+		target = <&am33xx_pinmux>;
+		__overlay__ {
+			bb_at86_pins: bb_at86_pins {
+				pinctrl-single,pins = <
+					AM33XX_PADCONF(AM335X_PIN_GPMC_A0, PIN_INPUT_PULLDOWN, MUX_MODE7)    /* irq P9_15 (R13) gpmc_a0.gpio1[16] */
+					AM33XX_PADCONF(AM335X_PIN_GPMC_A1, PIN_OUTPUT_PULLDOWN, MUX_MODE7)   /* rst P9_23 (V14) gpmc_a1.gpio1[17] */
+					AM33XX_PADCONF(AM335X_PIN_GPMC_BEN1, PIN_OUTPUT_PULLDOWN, MUX_MODE7) /* slp P9_12 (U18) gpmc_be1n.gpio1[28] */
+				>;
+			};
+			spi0_at86_s0: spi0_at86_s0 {
+				pinctrl-single,pins = <
+					AM33XX_PADCONF(AM335X_PIN_SPI0_SCLK, PIN_INPUT, MUX_MODE0) /* P9_22 (A17) spi0_sclk.spi0_sclk */
+					AM33XX_PADCONF(AM335X_PIN_SPI0_D0, PIN_INPUT, MUX_MODE0)   /* P9_21 (B17) spi0_d0.spi0_d0 */
+					AM33XX_PADCONF(AM335X_PIN_SPI0_D1, PIN_INPUT, MUX_MODE0)   /* P9_18 (B16) spi0_d1.spi0_d1 */
+					AM33XX_PADCONF(AM335X_PIN_SPI0_CS0, PIN_INPUT, MUX_MODE0)  /* P9_17 (A16) spi0_cs0.spi0_cs0 */
+				>;
+			};
+		};
+	};
+
+	fragment@3 {
+		target = <&spi0>;
+		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			status = "okay";
+			pinctrl-names = "default";
+			pinctrl-0 = <&spi0_at86_s0>;
+
+			at86rf233@0 {
+				compatible = "atmel,at86rf233";
+
+				pinctrl-names = "default";
+				pinctrl-0 = <&bb_at86_pins>;
+
+				spi-max-frequency = <1000000>;
+				reg = <0>;
+				interrupt-parent = <&gpio1>;
+				interrupts = <16 IRQ_TYPE_LEVEL_HIGH>; /* gpio1[16] active high */
+				/* Optionals */
+				xtal-trim = /bits/ 8 <0xf>; /* REB233-XPRO uses internal oscilator, XTAL_TRIM value is recommended */
+
+				reset-gpio = <&gpio1 28 0x00>; 
+				sleep-gpio = <&gpio1 17 0x00>;
+				/* if not using Optionals: RST pin must be HIGH, SLEEP must be LOW  */
+			};
+		};
+	};
+};
