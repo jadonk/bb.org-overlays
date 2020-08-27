@@ -24,41 +24,56 @@
 	/* state the resources this cape uses */
 	exclusive-use =
 		/* the pin header uses */
-		"P9.17",	/* spi0_cs0 */
-		"P9.18",	/* spi0_d1 */
-		"P9.21",	/* spi0_d0 */
-		"P9.22",	/* spi0_sclk */
+		"P9.17",	/* P9_17 (A16) spi0_cs0.spi0_cs0 */
+		"P9.18",	/* P9_18 (B16) spi0_d1.spi0_d1 */
+		"P9.21",	/* P9_21 (B17) spi0_d0.spi0_d0 */
+		"P9.22",	/* P9_22 (A17) spi0_sclk.spi0_sclk */
 		/* the hardware ip uses */
 		"spi0";
 
 	/*
-	 * Free up the pins used by the cape from the pinmux helpers.
+	 * Helper to show loaded overlays under: /proc/device-tree/chosen/overlays/
 	 */
 	fragment@0 {
-		target = <&ocp>;
+		target-path="/";
 		__overlay__ {
-			P9_17_pinmux { status = "disabled"; };	/* spi0_cs0 */
-			P9_18_pinmux { status = "disabled"; };	/* spi0_d1 */
-			P9_21_pinmux { status = "disabled"; };	/* spi0_d0 */
-			P9_22_pinmux { status = "disabled"; };	/* spi0_sclk */
+
+			chosen {
+				overlays {
+					BB-SPIDEV0-00A0 = __TIMESTAMP__;
+				};
+			};
 		};
 	};
 
+	/*
+	 * Free up the pins used by the cape from the pinmux helpers.
+	 */
 	fragment@1 {
+		target = <&ocp>;
+		__overlay__ {
+			P9_17_pinmux { status = "disabled"; };	/* P9_17 (A16) spi0_cs0.spi0_cs0 */
+			P9_18_pinmux { status = "disabled"; };	/* P9_18 (B16) spi0_d1.spi0_d1 */
+			P9_21_pinmux { status = "disabled"; };	/* P9_21 (B17) spi0_d0.spi0_d0 */
+			P9_22_pinmux { status = "disabled"; };	/* P9_22 (A17) spi0_sclk.spi0_sclk */
+		};
+	};
+
+	fragment@2 {
 		target = <&am33xx_pinmux>;
 		__overlay__ {
 			bb_spi0_pins: pinmux_bb_spi0_pins {
 				pinctrl-single,pins = <
-					0x150 0x30	/* spi0_sclk.spi0_sclk, INPUT_PULLUP | MODE0 */
-					0x154 0x30	/* spi0_d0.spi0_d0, INPUT_PULLUP | MODE0 */
-					0x158 0x10	/* spi0_d1.spi0_d1, OUTPUT_PULLUP | MODE0 */
-					0x15c 0x10	/* spi0_cs0.spi0_cs0, OUTPUT_PULLUP | MODE0 */
+					AM33XX_PADCONF(AM335X_PIN_SPI0_SCLK, PIN_INPUT, MUX_MODE0) /* P9_22 (A17) spi0_sclk.spi0_sclk */
+					AM33XX_PADCONF(AM335X_PIN_SPI0_D0, PIN_INPUT, MUX_MODE0)   /* P9_21 (B17) spi0_d0.spi0_d0 */
+					AM33XX_PADCONF(AM335X_PIN_SPI0_D1, PIN_INPUT, MUX_MODE0)   /* P9_18 (B16) spi0_d1.spi0_d1 */
+					AM33XX_PADCONF(AM335X_PIN_SPI0_CS0, PIN_INPUT, MUX_MODE0)  /* P9_17 (A16) spi0_cs0.spi0_cs0 */
 				>;
 			};
 		};
 	};
 
-	fragment@2 {
+	fragment@3 {
 		target = <&spi0>;
 		__overlay__ {
 			#address-cells = <1>;
@@ -67,13 +82,13 @@
 			status = "okay";
 			pinctrl-names = "default";
 			pinctrl-0 = <&bb_spi0_pins>;
-			ti,pio-mode; /* disable dma when used as an overlay, dma gets stuck at 160 bits... */
 
 			channel@0 {
 				#address-cells = <1>;
 				#size-cells = <0>;
 
 				compatible = "spidev";
+				symlink = "spi/0.0";
 
 				reg = <0>;
 				spi-max-frequency = <16000000>;
@@ -85,6 +100,7 @@
 				#size-cells = <0>;
 
 				compatible = "spidev";
+				symlink = "spi/0.1";
 
 				reg = <1>;
 				spi-max-frequency = <16000000>;

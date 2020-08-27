@@ -16,9 +16,24 @@
 	version = "00A0";
 
 	/*
-	 * Free up the pins used by the cape from the pinmux helpers.
+	 * Helper to show loaded overlays under: /proc/device-tree/chosen/overlays/
 	 */
 	fragment@0 {
+		target-path="/";
+		__overlay__ {
+
+			chosen {
+				overlays {
+					AM335X-PRU-RPROC-4-14-TI-PRUCAPE-00A0 = __TIMESTAMP__;
+				};
+			};
+		};
+	};
+
+	/*
+	 * Free up the pins used by the cape from the pinmux helpers.
+	 */
+	fragment@1 {
 		target = <&ocp>;
 		__overlay__ {
 			P9_27_pinmux { status = "disabled"; };	/* P9_27: mcasp0_fsr, OMAP_MUX_MODE6 | AM33XX_PIN_INPUT, PRU CAPE SW1 */
@@ -32,7 +47,7 @@
 			P8_42_pinmux { status = "disabled"; };	/* P8_42: lcd_data5, OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT, PRU CAPE RGB_2 LED, HDMI Conf. */
 			P8_45_pinmux { status = "disabled"; };	/* P8_45: lcd_data0, OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT, PRU CAPE Audio Data, HDMI Conf. */
 			P8_46_pinmux { status = "disabled"; };	/* P8_46: lcd_data1, OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT, PRU CAPE Audio Clk, HDMI Conf. */
-			P9_43_pinmux { status = "disabled"; };	/* P9_43: lcd_data2, OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT, PRU CAPE Audio Sync, HDMI Conf. */
+			P8_43_pinmux { status = "disabled"; };	/* P8_43: lcd_data2, OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT, PRU CAPE Audio Sync, HDMI Conf. */
 			P9_24_pinmux { status = "disabled"; };	/* P9_24: uart1_txd, OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT, PRU CAPE PRU UART txd */
 			P9_26_pinmux { status = "disabled"; };	/* P9_26: uart1_rxd, OMAP_MUX_MODE5 | AM33XX_PIN_INPUT, PRU CAPE PRU UART rxd */
 			P9_21_pinmux { status = "disabled"; };	/* P9_21: spi0_d0, OMAP_MUX_MODE4 | AM33XX_PIN_OUTPUT, PRU CAPE PRU UART rts */
@@ -49,7 +64,7 @@
 		};
 	};
 
-	fragment@1 {
+	fragment@2 {
 		target = <&am33xx_pinmux>;
 		__overlay__ {
 			pru_cape_bone_pins: pru_cape_bone_pins {
@@ -65,7 +80,7 @@
 					0x0b4 0x05	/* P8_42: lcd_data5, OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT, PRU CAPE RGB_2 LED, HDMI Conf. */
 					0x0a0 0x05	/* P8_45: lcd_data0, OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT, PRU CAPE Audio Data, HDMI Conf. */
 					0x0a4 0x05	/* P8_46: lcd_data1, OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT, PRU CAPE Audio Clk, HDMI Conf. */
-					0x0a8 0x05	/* P9_43: lcd_data2, OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT, PRU CAPE Audio Sync, HDMI Conf. */
+					0x0a8 0x05	/* P8_43: lcd_data2, OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT, PRU CAPE Audio Sync, HDMI Conf. */
 					0x184 0x05	/* P9_24: uart1_txd, OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT, PRU CAPE PRU UART txd */
 					0x180 0x2d	/* P9_26: uart1_rxd, OMAP_MUX_MODE5 | AM33XX_PIN_INPUT, PRU CAPE PRU UART rxd */
 					0x154 0x04	/* P9_21: spi0_d0, OMAP_MUX_MODE4 | AM33XX_PIN_OUTPUT, PRU CAPE PRU UART rts */
@@ -84,7 +99,7 @@
 		};
 	};
 
-	fragment@2 {
+	fragment@3 {
 		target-path="/";
 		__overlay__ {
 

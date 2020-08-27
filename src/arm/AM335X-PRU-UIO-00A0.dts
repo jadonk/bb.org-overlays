@@ -15,7 +15,22 @@
 	part-number = "AM335X-PRU-UIO";
 	version = "00A0";
 
+	/*
+	 * Helper to show loaded overlays under: /proc/device-tree/chosen/overlays/
+	 */
 	fragment@0 {
+		target-path="/";
+		__overlay__ {
+
+			chosen {
+				overlays {
+					AM335X-PRU-UIO-00A0 = __TIMESTAMP__;
+				};
+			};
+		};
+	};
+
+	fragment@1 {
 		target-path="/";
 		__overlay__ {
 

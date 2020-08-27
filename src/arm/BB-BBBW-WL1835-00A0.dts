@@ -1,9 +1,6 @@
+// SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (C) 2012 Texas Instruments Incorporated - http://www.ti.com/
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
  */
 
 /dts-v1/;
@@ -19,6 +16,15 @@
 		__overlay__ {
 			model = "TI AM335x BeagleBone Black Wireless";
 			compatible = "ti,am335x-bone-black", "ti,am335x-bone", "ti,am33xx";
+
+			/*
+			 * Helper to show loaded overlays under: /proc/device-tree/chosen/overlays/
+			 */
+			chosen {
+				overlays {
+					BB-BBBW-WL1835-00A0 = __TIMESTAMP__;
+				};
+			};
 
 			wlan_en_reg: fixedregulator@2 {
 				compatible = "regulator-fixed";

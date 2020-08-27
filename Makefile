@@ -1,7 +1,10 @@
 
-DTC ?= /usr/bin/dtc
+DTC ?= dtc
 CPP ?= cpp
+CC ?=
 DESTDIR ?=
+
+DTCVERSION ?= $(shell $(DTC) --version | grep ^Version | sed 's/^.* //g')
 
 MAKEFLAGS += -rR --no-print-directory
 
@@ -32,12 +35,39 @@ ifndef KBUILD_VERBOSE
   KBUILD_VERBOSE = 0
 endif
 
+#https://snapshot.debian.org/package/device-tree-compiler/
+
 DTC_FLAGS += -Wno-unit_address_vs_reg
-#New DTC Flags for v1.4.5 (Debian 9.x (Buster))
-#DTC_FLAGS += -Wno-dmas_property
-#DTC_FLAGS += -Wno-gpios_property
-#DTC_FLAGS += -Wno-pwms_property
-#DTC_FLAGS += -Wno-interrupts_property
+
+ifeq "$(DTCVERSION)" "1.4.7"
+	# wget https://snapshot.debian.org/archive/debian/20180911T215003Z/pool/main/d/device-tree-compiler/device-tree-compiler_1.4.7-3_amd64.deb
+	DTC_FLAGS += -Wno-chosen_node_is_root
+	DTC_FLAGS += -Wno-alias_paths
+endif
+
+ifeq "$(DTCVERSION)" "1.5.0"
+	# wget https://snapshot.debian.org/archive/debian/20190708T032337Z/pool/main/d/device-tree-compiler/device-tree-compiler_1.5.0-2_amd64.deb
+	DTC_FLAGS += -Wno-chosen_node_is_root
+	DTC_FLAGS += -Wno-alias_paths
+endif
+
+ifeq "$(DTCVERSION)" "1.5.1"
+	# wget https://snapshot.debian.org/archive/debian/20190914T205752Z/pool/main/d/device-tree-compiler/device-tree-compiler_1.5.1-1_amd64.deb
+	DTC_FLAGS += -Wno-chosen_node_is_root
+	DTC_FLAGS += -Wno-alias_paths
+endif
+
+ifeq "$(DTCVERSION)" "1.6.0"
+	#wget https://snapshot.debian.org/archive/debian/20200304T150617Z/pool/main/d/device-tree-compiler/device-tree-compiler_1.6.0-1_amd64.deb
+	DTC_FLAGS += -Wno-chosen_node_is_root
+	DTC_FLAGS += -Wno-alias_paths
+endif
+
+ifeq "$(DTCVERSION)" "2.0.0"
+	#BUILDBOT...http://gfnd.rcn-ee.org:8080/job/beagleboard_overlays/job/master/
+	DTC_FLAGS += -Wno-chosen_node_is_root
+	DTC_FLAGS += -Wno-alias_paths
+endif
 
 # Beautify output
 # ---------------------------------------------------------------------------
@@ -87,9 +117,11 @@ export quiet Q KBUILD_VERBOSE
 
 all_%:
 	$(Q)$(MAKE) ARCH=$* all_arch
+	$(CC)gcc -o config-pin ./tools/pmunts_muntsos/config-pin.c
 
 clean_%:
 	$(Q)$(MAKE) ARCH=$* clean_arch
+	rm config-pin || true
 
 install_%:
 	$(Q)$(MAKE) ARCH=$* install_arch
@@ -126,8 +158,8 @@ quiet_cmd_clean    = CLEAN   $(obj)
 
 dtc-tmp = $(subst $(comma),_,$(dot-target).dts.tmp)
 
-dtc_cpp_flags  = -Wp,-MD,$(depfile).pre.tmp -nostdinc	\
-                 -Iinclude -I$(src) -Itestcase-data	\
+dtc_cpp_flags  = -Wp,-MD,$(depfile).pre.tmp -nostdinc		\
+                 -Iinclude -I$(src) -Isrc -Itestcase-data	\
                  -undef -D__DTS__
 
 quiet_cmd_dtc = DTC     $@
@@ -148,6 +180,8 @@ PHONY += install_arch
 install_arch: $(ARCH_DTBO)
 	mkdir -p $(DESTDIR)/lib/firmware/
 	cp -v $(obj)/*.dtbo $(DESTDIR)/lib/firmware/
+	mkdir -p $(DESTDIR)/usr/bin/
+	cp -v config-pin $(DESTDIR)/usr/bin/
 
 RCS_FIND_IGNORE := \( -name SCCS -o -name BitKeeper -o -name .svn -o -name CVS \
                    -o -name .pc -o -name .hg -o -name .git \) -prune -o
